@@ -1,61 +1,83 @@
-import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import os
+import numpy as np
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import r2_score
+from sklearn.model_selection import train_test_split
 
-# Configuración de Streamlit
-st.title('Análisis de Datos de Salud y Economía')
+# Cargar los datos del CSV
+csv_file_path = "inteligente.csv"
+df = pd.read_csv(csv_file_path)
 
-# Cargar el archivo CSV usando el cargador de archivos de Streamlit
-archivo_csv = st.file_uploader("Sube tu archivo CSV", type="csv")
+# Estadísticas descriptivas
+print(df.describe())
 
-if archivo_csv:
-    try:
-        # Cargar los datos
-        data = pd.read_csv(archivo_csv)
+# Función para mostrar gráficos
+def plot_histogram(df):
+    plt.figure(figsize=(10, 6))
+    sns.histplot(df['IQ'], bins=10, kde=True)
+    plt.title('Distribución de IQ')
+    plt.xlabel('IQ')
+    plt.ylabel('Frecuencia')
+    plt.grid(True)
+    plt.show()
 
-        # Mostrar las primeras filas del dataset
-        st.write(data.head())
+def plot_gender_distribution(df):
+    plt.figure(figsize=(10, 6))
+    sns.countplot(x='Gender', data=df)
+    plt.title('Distribución de Género')
+    plt.xlabel('Género')
+    plt.ylabel('Frecuencia')
+    plt.grid(True)
+    plt.show()
 
-        # Seleccionar un país
-        paises = data['Country'].unique()
-        pais_seleccionado = st.selectbox("Selecciona un país", paises)
+def plot_iq_by_field(df):
+    plt.figure(figsize=(14, 8))
+    sns.boxplot(x='Field of Expertise', y='IQ', data=df)
+    plt.title('Distribución de IQ por Campo de Especialización')
+    plt.xlabel('Campo de Especialización')
+    plt.ylabel('IQ')
+    plt.xticks(rotation=90)
+    plt.grid(True)
+    plt.show()
 
-        # Filtrar datos para el país seleccionado
-        data_pais = data[data['Country'] == pais_seleccionado]
+def plot_achievements_count(df):
+    plt.figure(figsize=(14, 8))
+    sns.countplot(y='Achievements', data=df, order=df['Achievements'].value_counts().index)
+    plt.title('Conteo de Logros')
+    plt.xlabel('Frecuencia')
+    plt.ylabel('Logros')
+    plt.grid(True)
+    plt.show()
 
-        if not data_pais.empty:
-            # Realizar la regresión lineal
-            X = data_pais[['Year']].values
-            y = data_pais['Life expectancy '].values
+def plot_linear_regression(df):
+    if 'Years of Experience' in df.columns and 'IQ' in df.columns:
+        X = df[['Years of Experience']]
+        y = df['IQ']
+        
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
+        
+        model = LinearRegression()
+        model.fit(X_train, y_train)
+        
+        y_pred = model.predict(X_test)
+        
+        plt.figure(figsize=(10, 6))
+        plt.scatter(X_test, y_test, color='blue', label='Datos reales')
+        plt.plot(X_test, y_pred, color='red', linewidth=2, label='Línea de regresión')
+        plt.title('Regresión Lineal de IQ vs. Años de Experiencia')
+        plt.xlabel('Años de Experiencia')
+        plt.ylabel('IQ')
+        plt.legend()
+        plt.grid(True)
+        plt.show()
+    else:
+        print("Las columnas 'Years of Experience' y 'IQ' no están presentes en los datos.")
 
-            # Ajustar modelo de regresión lineal
-            model = LinearRegression()
-            model.fit(X, y)
-            predictions = model.predict(X)
-            r2 = r2_score(y, predictions)
-
-            # Graficar la regresión lineal
-            plt.figure(figsize=(10, 6))
-            sns.scatterplot(x='Year', y='Life expectancy ', data=data_pais, color='blue')
-            sns.lineplot(x=data_pais['Year'], y=predictions, color='red')
-            plt.title(f'Regresión Lineal: Expectativa de Vida en {pais_seleccionado}')
-            plt.xlabel('Año')
-            plt.ylabel('Expectativa de Vida')
-            plt.grid(True)
-            st.pyplot(plt.gcf())
-            plt.close()
-
-            # Mostrar el valor de R²
-            st.write(f'Precisión de la regresión lineal (R²) para {pais_seleccionado}: {r2:.2f}')
-        else:
-            st.warning("No hay suficientes datos para realizar la regresión lineal.")
-
-    except pd.errors.EmptyDataError:
-        st.error("El archivo está vacío. Por favor, verifique el contenido del archivo.")
-    except Exception as e:
-        st.error(f"Ocurrió un error al procesar el archivo: {e}")
-else:
-    st.info("Por favor, sube un archivo CSV para comenzar.")
+# Mostrar gráficos
+plot_histogram(df)
+plot_gender_distribution(df)
+plot_iq_by_field(df)
+plot_achievements_count(df)
+plot_linear_regression(df)
