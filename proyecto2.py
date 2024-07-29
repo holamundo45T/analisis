@@ -2,6 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import os
+import streamlit as st
 import numpy as np
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
@@ -10,10 +11,7 @@ from sklearn.model_selection import train_test_split
 csv_file_path = "inteligente.csv"
 df = pd.read_csv(csv_file_path)
 
-# Estadísticas descriptivas
-print(df.describe())
-
-# Función para mostrar gráficos
+# Función para mostrar gráficos en Streamlit
 def plot_histogram(df):
     plt.figure(figsize=(10, 6))
     sns.histplot(df['IQ'], bins=10, kde=True)
@@ -21,7 +19,8 @@ def plot_histogram(df):
     plt.xlabel('IQ')
     plt.ylabel('Frecuencia')
     plt.grid(True)
-    plt.show()
+    st.pyplot(plt.gcf())
+    plt.close()
 
 def plot_gender_distribution(df):
     plt.figure(figsize=(10, 6))
@@ -30,7 +29,8 @@ def plot_gender_distribution(df):
     plt.xlabel('Género')
     plt.ylabel('Frecuencia')
     plt.grid(True)
-    plt.show()
+    st.pyplot(plt.gcf())
+    plt.close()
 
 def plot_iq_by_field(df):
     plt.figure(figsize=(14, 8))
@@ -40,7 +40,8 @@ def plot_iq_by_field(df):
     plt.ylabel('IQ')
     plt.xticks(rotation=90)
     plt.grid(True)
-    plt.show()
+    st.pyplot(plt.gcf())
+    plt.close()
 
 def plot_achievements_count(df):
     plt.figure(figsize=(14, 8))
@@ -49,7 +50,8 @@ def plot_achievements_count(df):
     plt.xlabel('Frecuencia')
     plt.ylabel('Logros')
     plt.grid(True)
-    plt.show()
+    st.pyplot(plt.gcf())
+    plt.close()
 
 def plot_linear_regression(df):
     if 'Years of Experience' in df.columns and 'IQ' in df.columns:
@@ -71,13 +73,27 @@ def plot_linear_regression(df):
         plt.ylabel('IQ')
         plt.legend()
         plt.grid(True)
-        plt.show()
+        st.pyplot(plt.gcf())
+        plt.close()
     else:
-        print("Las columnas 'Years of Experience' y 'IQ' no están presentes en los datos.")
+        st.write("Las columnas 'Years of Experience' y 'IQ' no están presentes en los datos.")
 
-# Mostrar gráficos
-plot_histogram(df)
-plot_gender_distribution(df)
-plot_iq_by_field(df)
-plot_achievements_count(df)
-plot_linear_regression(df)
+# Crear la interfaz de Streamlit
+st.title("Análisis de Datos")
+
+st.sidebar.header("Selecciona el gráfico para mostrar")
+option = st.sidebar.selectbox(
+    "Selecciona una opción:",
+    ["Distribución de IQ", "Distribución de Género", "IQ por Campo de Especialización", "Conteo de Logros", "Regresión Lineal"]
+)
+
+if option == "Distribución de IQ":
+    plot_histogram(df)
+elif option == "Distribución de Género":
+    plot_gender_distribution(df)
+elif option == "IQ por Campo de Especialización":
+    plot_iq_by_field(df)
+elif option == "Conteo de Logros":
+    plot_achievements_count(df)
+elif option == "Regresión Lineal":
+    plot_linear_regression(df)
