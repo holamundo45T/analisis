@@ -10,6 +10,7 @@ from sklearn.model_selection import train_test_split
 csv_file_path = "inteligente.csv"
 df = pd.read_csv(csv_file_path)
 
+
 # Estadísticas descriptivas
 print(df.describe())
 
@@ -52,7 +53,7 @@ def plot_achievements_count(df):
     plt.show()
 
 def plot_linear_regression(df):
-    if 'Years of Experience' in df.columns and 'IQ' in df.columns:
+    if 'Years of Expertise' in df.columns and 'IQ' in df.columns:
         X = df[['Years of Experience']]
         y = df['IQ']
         
